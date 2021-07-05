@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.kircherelectronics.gyroscopeexplorer.listener.Cotrollerlistener;
+
 public class JoyStickView extends View implements Runnable {
     // Variables
     private OnJoystickMoveListener onJoystickMoveListener; // Listener
@@ -30,11 +32,15 @@ public class JoyStickView extends View implements Runnable {
     private Paint verticalLine;
     private int joystickRadius;
     private int buttonRadius;
-    private int lastAngle = 0;
-    private int lastPower = 0;
 
     private Boolean inMainCircle = false;
     public boolean justShowTouch = false;
+
+    public void setCotrollerlistener(Cotrollerlistener cotrollerlistener) {
+        this.cotrollerlistener = cotrollerlistener;
+    }
+
+    public Cotrollerlistener cotrollerlistener;
 
     public JoyStickView(Context context) {
         super(context);
@@ -166,6 +172,8 @@ public class JoyStickView extends View implements Runnable {
     public boolean onTouchEvent(MotionEvent event) {
         xPosition = (int) event.getX();
         yPosition = (int) event.getY();
+        if (cotrollerlistener !=null)
+        cotrollerlistener.moved(xPosition, yPosition);
         Log.i("miladTestJoy", "xPosition: " + xPosition);
         Log.i("miladTestJoy", "YPosition: " + yPosition);
         double abs = Math.sqrt((xPosition - centerX) * (xPosition - centerX)
@@ -190,7 +198,7 @@ public class JoyStickView extends View implements Runnable {
             convertPositionToPeriod(true);
         }
 //        if (inMainCircle)
-            invalidate();
+        invalidate();
         return true;
     }
 
@@ -212,6 +220,6 @@ public class JoyStickView extends View implements Runnable {
         double differentY = yPosition - startRange;
 
         if (onJoystickMoveListener != null && !justShowTouch)
-            onJoystickMoveListener.onRangeChanged((int) ((differentX * partOfBigRange) + startOfBigRange), (int) (((differentY * partOfBigRange) + startOfBigRange)*(-1)), isDown);
+            onJoystickMoveListener.onRangeChanged((int) ((differentX * partOfBigRange) + startOfBigRange), (int) (((differentY * partOfBigRange) + startOfBigRange) * (-1)), isDown);
     }
 }

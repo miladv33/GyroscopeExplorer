@@ -51,7 +51,7 @@
         android:id="@+id/layout_calibrated_statistics"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.75" >
+        android:layout_weight="2" >
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -81,12 +81,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
+                            android:textSize="12sp"
                             android:text="@string/label_x_axis"
                             android:textAppearance="?android:attr/textAppearanceMedium" />
 
                         <TextView
                             android:id="@+id/value_x_axis_calibrated"
                             android:layout_width="wrap_content"
+                            android:textSize="12sp"
                             android:layout_height="wrap_content"
                             android:layout_toRightOf="@+id/label_x_axis_calibrated"
                             android:text="@string/value_default"
@@ -102,6 +104,7 @@
                             android:id="@+id/label_y_axis_calibrated"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:textSize="12sp"
                             android:layout_alignParentLeft="true"
                             android:text="@string/label_y_axis"
                             android:textAppearance="?android:attr/textAppearanceMedium" />
@@ -110,6 +113,7 @@
                             android:id="@+id/value_y_axis_calibrated"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:textSize="12sp"
                             android:layout_toRightOf="@+id/label_y_axis_calibrated"
                             android:text="@string/value_default"
                             android:textAppearance="?android:attr/textAppearanceMedium" />
@@ -125,6 +129,7 @@
                             android:id="@+id/label_z_axis_calibrated"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:textSize="12sp"
                             android:layout_alignParentLeft="true"
                             android:text="@string/label_z_axis"
                             android:textAppearance="?android:attr/textAppearanceMedium" />
@@ -133,7 +138,32 @@
                             android:id="@+id/value_z_axis_calibrated"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:textSize="12sp"
                             android:layout_toRightOf="@+id/label_z_axis_calibrated"
+                            android:text="@string/value_default"
+                            android:textAppearance="?android:attr/textAppearanceMedium" />
+                    </RelativeLayout>
+                    <RelativeLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="20dp"
+                        android:layout_weight="1" >
+
+                        <TextView
+                            android:id="@+id/label_x_forController"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="12sp"
+                            android:layout_alignParentLeft="true"
+                            android:text="@string/label_z_axis"
+                            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                        <TextView
+                            android:id="@+id/label_y_forController"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="12sp"
+                            android:layout_toRightOf="@+id/label_x_forController"
                             android:text="@string/value_default"
                             android:textAppearance="?android:attr/textAppearanceMedium" />
                     </RelativeLayout>

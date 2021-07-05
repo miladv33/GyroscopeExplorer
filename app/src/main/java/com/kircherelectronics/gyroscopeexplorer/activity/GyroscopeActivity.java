@@ -7,9 +7,12 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -24,6 +27,7 @@ import com.kircherelectronics.fsensor.sensor.gyroscope.GyroscopeSensor;
 import com.kircherelectronics.fsensor.sensor.gyroscope.KalmanGyroscopeSensor;
 import com.kircherelectronics.gyroscopeexplorer.Controller;
 import com.kircherelectronics.gyroscopeexplorer.R;
+import com.kircherelectronics.gyroscopeexplorer.listener.Cotrollerlistener;
 import com.kircherelectronics.gyroscopeexplorer.view.joystick.JoyStickView;
 import com.kircherelectronics.gyroscopeexplorer.datalogger.DataLoggerManager;
 import com.kircherelectronics.gyroscopeexplorer.gauge.GaugeBearing;
@@ -60,7 +64,7 @@ import androidx.core.content.ContextCompat;
  *
  * @author Kaleb
  */
-public class GyroscopeActivity extends AppCompatActivity {
+public class GyroscopeActivity extends AppCompatActivity implements Cotrollerlistener {
     private final static int WRITE_EXTERNAL_STORAGE_REQUEST = 1000;
 
     // Indicate if the output should be logged to a .csv file
@@ -82,6 +86,9 @@ public class GyroscopeActivity extends AppCompatActivity {
     private TextView tvXAxis;
     private TextView tvYAxis;
     private TextView tvZAxis;
+    private TextView controllerXText;
+    private TextView controllerYText;
+    private JoyStickView joyStickView;
 
     private FSensor fSensor;
 
@@ -98,8 +105,8 @@ public class GyroscopeActivity extends AppCompatActivity {
         }
     };
 
-    Controller rightController = new Controller(0,0);
-    Controller leftController  = new Controller(0,0);
+    Controller rightController = new Controller(0, 0);
+    Controller leftController = new Controller(0, 0);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -256,7 +263,10 @@ public class GyroscopeActivity extends AppCompatActivity {
         tvXAxis = this.findViewById(R.id.value_x_axis_calibrated);
         tvYAxis = this.findViewById(R.id.value_y_axis_calibrated);
         tvZAxis = this.findViewById(R.id.value_z_axis_calibrated);
-
+        controllerXText = this.findViewById(R.id.label_x_forController);
+        controllerYText = this.findViewById(R.id.label_y_forController);
+        joyStickView = this.findViewById(R.id.joystick);
+        joyStickView.setCotrollerlistener(this);
         // Initialize the calibrated gauges views
         gaugeBearingCalibrated = findViewById(R.id.gauge_bearing_calibrated);
         gaugeTiltCalibrated = findViewById(R.id.gauge_tilt_calibrated);
@@ -313,9 +323,16 @@ public class GyroscopeActivity extends AppCompatActivity {
     }
 
     private void updateText() {
-        tvXAxis.setText(String.format(Locale.getDefault(), "%.1f", (Math.toDegrees(fusedOrientation[1]) + 360) % 360));
-        tvYAxis.setText(String.format(Locale.getDefault(), "%.1f", (Math.toDegrees(fusedOrientation[2]) + 360) % 360));
-        tvZAxis.setText(String.format(Locale.getDefault(), "%.1f", (Math.toDegrees(fusedOrientation[0]) + 360) % 360));
+        double z = (Math.toDegrees(fusedOrientation[0]) + 360) % 360;
+        double x = (Math.toDegrees(fusedOrientation[1]) + 360) % 360;
+        double y = (Math.toDegrees(fusedOrientation[2]) + 360) % 360;
+        rightController.setX((int) x);
+        rightController.setY((int) y);
+        GamePadConfig gamePadConfig = new GamePadConfig();
+        setJoystickView(joyStickView, gamePadConfig, true);
+        tvZAxis.setText(String.format(Locale.getDefault(), "%.1f", z));
+        tvXAxis.setText(String.format(Locale.getDefault(), "%.1f", x));
+        tvYAxis.setText(String.format(Locale.getDefault(), "%.1f", y));
     }
 
     private void updateGauges() {
@@ -343,16 +360,60 @@ public class GyroscopeActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void moved(final int x, final int y) {
+        controllerXText.post(new Runnable() {
+            @Override
+            public void run() {
+                controllerXText.setText("x: "+ x);
+                controllerYText.setText("y: "+ y);
+            }
+        });
+
+    }
+
     private enum Mode {
         GYROSCOPE_ONLY,
         COMPLIMENTARY_FILTER,
         KALMAN_FILTER
     }
 
+    private void setJoystickView(JoyStickView view, GamePadConfig pState, boolean isRightController) {
+//        view.muckTouch(mockOnTouchJoysticks(view, pState, isRightController));
+    }
 
-    private void mockOnTouchJoysticks(JoyStickView view, GamePadConfig pState, boolean isRightController) {
-        double centerStart = (double) (view.getWidth() / 4);
-
+    private MotionEvent mockOnTouchJoysticks(JoyStickView view, GamePadConfig pState, boolean isRightController) {
+        Controller controller;
+        if (isRightController) {
+            controller = rightController;
+        } else {
+            controller = leftController;
+        }
+        Log.i("miladTest", "mockOnTouchJoysticks: controller.getX()" + controller.getX());
+        Log.i("miladTest", "mockOnTouchJoysticks: controller.getY()" + controller.getY());
+        long downTime = SystemClock.uptimeMillis();
+        long eventTime = SystemClock.uptimeMillis() + 50;
+        int metaState = 0;
+        int x = convertRange(0, 360, (int) view.startRange, (int) view.endRange, controller.getX());
+        int y = convertRange(0, 360, (int) view.startRange, (int) view.endRange, controller.getY());
+        Log.i("miladTest", "mockOnTouchJoysticks: x" + x);
+        Log.i("miladTest", "mockOnTouchJoysticks: y" + y);
+        int motionEvent;
+        if (x == 0) {
+            view.justShowTouch = false;
+            motionEvent = MotionEvent.ACTION_UP;
+        } else {
+            view.justShowTouch = true;
+            motionEvent = MotionEvent.ACTION_DOWN;
+        }
+        return MotionEvent.obtain(
+                downTime,
+                eventTime,
+                motionEvent,
+                x,
+                y,
+                metaState
+        );
     }
 
     private int convertRange(int originalStart, int originalEnd, int newStart, int newEnd, int value) {
