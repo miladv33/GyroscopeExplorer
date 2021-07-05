@@ -24,6 +24,7 @@ import com.kircherelectronics.fsensor.sensor.gyroscope.ComplementaryGyroscopeSen
 import com.kircherelectronics.fsensor.sensor.gyroscope.GyroscopeSensor;
 import com.kircherelectronics.fsensor.sensor.gyroscope.KalmanGyroscopeSensor;
 import com.kircherelectronics.gyroscopeexplorer.R;
+import com.kircherelectronics.gyroscopeexplorer.activity.joystick.JoyStickView;
 import com.kircherelectronics.gyroscopeexplorer.datalogger.DataLoggerManager;
 import com.kircherelectronics.gyroscopeexplorer.gauge.GaugeBearing;
 import com.kircherelectronics.gyroscopeexplorer.gauge.GaugeRotation;
@@ -345,5 +346,10 @@ public class GyroscopeActivity extends AppCompatActivity {
         COMPLIMENTARY_FILTER,
         KALMAN_FILTER
     }
+
+    private void mockOnTouchJoysticks(JoyStickView view,GamePadConfig pState,boolean isRightController) {
+
+    }
+
 
 }
