@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/GyroscopeExplorer.iml" filepath="$PROJECT_DIR$/GyroscopeExplorer.iml" group="GyroscopeExplorer" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="GyroscopeExplorer/app" />
-      <module fileurl="file://$PROJECT_DIR$/fsensor/fsensor.iml" filepath="$PROJECT_DIR$/fsensor/fsensor.iml" group="GyroscopeExplorer/fsensor" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/myGyroscopeExplorer.iml" filepath="$PROJECT_DIR$/.idea/modules/myGyroscopeExplorer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/myGyroscopeExplorer.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/myGyroscopeExplorer.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fsensor/myGyroscopeExplorer.fsensor.iml" filepath="$PROJECT_DIR$/.idea/modules/fsensor/myGyroscopeExplorer.fsensor.iml" />
     </modules>
   </component>
 </project>
