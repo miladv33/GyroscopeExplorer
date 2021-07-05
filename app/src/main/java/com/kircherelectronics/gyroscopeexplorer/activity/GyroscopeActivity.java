@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,8 +22,9 @@ import com.kircherelectronics.fsensor.sensor.FSensor;
 import com.kircherelectronics.fsensor.sensor.gyroscope.ComplementaryGyroscopeSensor;
 import com.kircherelectronics.fsensor.sensor.gyroscope.GyroscopeSensor;
 import com.kircherelectronics.fsensor.sensor.gyroscope.KalmanGyroscopeSensor;
+import com.kircherelectronics.gyroscopeexplorer.Controller;
 import com.kircherelectronics.gyroscopeexplorer.R;
-import com.kircherelectronics.gyroscopeexplorer.activity.joystick.JoyStickView;
+import com.kircherelectronics.gyroscopeexplorer.view.joystick.JoyStickView;
 import com.kircherelectronics.gyroscopeexplorer.datalogger.DataLoggerManager;
 import com.kircherelectronics.gyroscopeexplorer.gauge.GaugeBearing;
 import com.kircherelectronics.gyroscopeexplorer.gauge.GaugeRotation;
@@ -94,9 +94,12 @@ public class GyroscopeActivity extends AppCompatActivity {
     private SensorSubject.SensorObserver sensorObserver = new SensorSubject.SensorObserver() {
         @Override
         public void onSensorChanged(float[] values) {
-          updateValues(values);
+            updateValues(values);
         }
     };
+
+    Controller rightController = new Controller(0,0);
+    Controller leftController  = new Controller(0,0);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +107,6 @@ public class GyroscopeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_gyroscope);
         dataLogger = new DataLoggerManager(this);
         meanFilter = new MeanFilter();
-
         uiHandler = new Handler();
         uiRunnable = new Runnable() {
             @Override
@@ -162,7 +164,7 @@ public class GyroscopeActivity extends AppCompatActivity {
                 break;
             case COMPLIMENTARY_FILTER:
                 fSensor = new ComplementaryGyroscopeSensor(this);
-                ((ComplementaryGyroscopeSensor)fSensor).setFSensorComplimentaryTimeConstant(getPrefImuOCfQuaternionCoeff());
+                ((ComplementaryGyroscopeSensor) fSensor).setFSensorComplimentaryTimeConstant(getPrefImuOCfQuaternionCoeff());
                 break;
             case KALMAN_FILTER:
                 fSensor = new KalmanGyroscopeSensor(this);
@@ -176,7 +178,7 @@ public class GyroscopeActivity extends AppCompatActivity {
 
     @Override
     public void onPause() {
-        if(helpDialog != null && helpDialog.isShowing()) {
+        if (helpDialog != null && helpDialog.isShowing()) {
             helpDialog.dismiss();
         }
 
@@ -246,7 +248,7 @@ public class GyroscopeActivity extends AppCompatActivity {
     private void initUI() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if(getSupportActionBar()!=null) {
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
@@ -268,15 +270,15 @@ public class GyroscopeActivity extends AppCompatActivity {
         boolean complimentaryFilterEnabled = getPrefComplimentaryEnabled();
         boolean kalmanFilterEnabled = getPrefKalmanEnabled();
 
-        if(meanFilterEnabled) {
+        if (meanFilterEnabled) {
             meanFilter.setTimeConstant(getPrefMeanFilterTimeConstant());
         }
 
         Mode mode;
 
-        if(!complimentaryFilterEnabled && !kalmanFilterEnabled) {
+        if (!complimentaryFilterEnabled && !kalmanFilterEnabled) {
             mode = Mode.GYROSCOPE_ONLY;
-        } else if(complimentaryFilterEnabled) {
+        } else if (complimentaryFilterEnabled) {
             mode = Mode.COMPLIMENTARY_FILTER;
         } else {
             mode = Mode.KALMAN_FILTER;
@@ -296,14 +298,14 @@ public class GyroscopeActivity extends AppCompatActivity {
     }
 
     private void startDataLog() {
-        if(!logData && requestPermissions()) {
+        if (!logData && requestPermissions()) {
             logData = true;
             dataLogger.startDataLog();
         }
     }
 
     private void stopDataLog() {
-        if(logData) {
+        if (logData) {
             logData = false;
             String path = dataLogger.stopDataLog();
             Toast.makeText(this, "File Written to: " + path, Toast.LENGTH_SHORT).show();
@@ -311,9 +313,9 @@ public class GyroscopeActivity extends AppCompatActivity {
     }
 
     private void updateText() {
-        tvXAxis.setText(String.format(Locale.getDefault(),"%.1f", (Math.toDegrees(fusedOrientation[1]) + 360) % 360));
-        tvYAxis.setText(String.format(Locale.getDefault(),"%.1f", (Math.toDegrees(fusedOrientation[2]) + 360) % 360));
-        tvZAxis.setText(String.format(Locale.getDefault(),"%.1f", (Math.toDegrees(fusedOrientation[0]) + 360) % 360));
+        tvXAxis.setText(String.format(Locale.getDefault(), "%.1f", (Math.toDegrees(fusedOrientation[1]) + 360) % 360));
+        tvYAxis.setText(String.format(Locale.getDefault(), "%.1f", (Math.toDegrees(fusedOrientation[2]) + 360) % 360));
+        tvZAxis.setText(String.format(Locale.getDefault(), "%.1f", (Math.toDegrees(fusedOrientation[0]) + 360) % 360));
     }
 
     private void updateGauges() {
@@ -332,11 +334,11 @@ public class GyroscopeActivity extends AppCompatActivity {
 
     private void updateValues(float[] values) {
         fusedOrientation = values;
-        if(meanFilterEnabled) {
+        if (meanFilterEnabled) {
             fusedOrientation = meanFilter.filter(fusedOrientation);
         }
 
-        if(logData) {
+        if (logData) {
             dataLogger.setRotation(fusedOrientation);
         }
     }
@@ -347,9 +349,14 @@ public class GyroscopeActivity extends AppCompatActivity {
         KALMAN_FILTER
     }
 
-    private void mockOnTouchJoysticks(JoyStickView view,GamePadConfig pState,boolean isRightController) {
+
+    private void mockOnTouchJoysticks(JoyStickView view, GamePadConfig pState, boolean isRightController) {
+        double centerStart = (double) (view.getWidth() / 4);
 
     }
 
-
+    private int convertRange(int originalStart, int originalEnd, int newStart, int newEnd, int value) {
+        double scale = (double) (newEnd - newStart) / (originalEnd - originalStart);
+        return (int) (newStart + (value - originalStart) * scale);
+    }
 }

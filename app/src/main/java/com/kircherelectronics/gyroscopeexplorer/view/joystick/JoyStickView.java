@@ -1,4 +1,4 @@
-package com.kircherelectronics.gyroscopeexplorer.activity.joystick;
+package com.kircherelectronics.gyroscopeexplorer.view.joystick;
 
 import android.content.Context;
 import android.graphics.Canvas;
