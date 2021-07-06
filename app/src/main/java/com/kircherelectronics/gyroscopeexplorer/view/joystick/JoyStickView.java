@@ -172,10 +172,6 @@ public class JoyStickView extends View implements Runnable {
     public boolean onTouchEvent(MotionEvent event) {
         xPosition = (int) event.getX();
         yPosition = (int) event.getY();
-        if (cotrollerlistener !=null)
-        cotrollerlistener.moved(xPosition, yPosition);
-        Log.i("miladTestJoy", "xPosition: " + xPosition);
-        Log.i("miladTestJoy", "YPosition: " + yPosition);
         double abs = Math.sqrt((xPosition - centerX) * (xPosition - centerX)
                 + (yPosition - centerY) * (yPosition - centerY));
         if (abs > joystickRadius) {
@@ -199,6 +195,8 @@ public class JoyStickView extends View implements Runnable {
         }
 //        if (inMainCircle)
         invalidate();
+        if (cotrollerlistener != null)
+            cotrollerlistener.moved(xPosition, yPosition);
         return true;
     }
 

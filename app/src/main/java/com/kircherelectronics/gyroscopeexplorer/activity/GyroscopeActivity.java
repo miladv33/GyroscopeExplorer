@@ -105,8 +105,11 @@ public class GyroscopeActivity extends AppCompatActivity implements Cotrollerlis
         }
     };
 
-    Controller rightController = new Controller(0, 0);
-    Controller leftController = new Controller(0, 0);
+    Controller rightController = new Controller(300, 300);
+    Controller leftController = new Controller(300, 300);
+    double lastZ = 0;
+    double lastX = 0;
+    double lastY = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -326,10 +329,15 @@ public class GyroscopeActivity extends AppCompatActivity implements Cotrollerlis
         double z = (Math.toDegrees(fusedOrientation[0]) + 360) % 360;
         double x = (Math.toDegrees(fusedOrientation[1]) + 360) % 360;
         double y = (Math.toDegrees(fusedOrientation[2]) + 360) % 360;
-        rightController.setX((int) x);
-        rightController.setY((int) y);
+
+        double defferentY = lastY - (fusedOrientation[2] * 1000);
+        if (defferentY >= 1 || defferentY <= -1)
+            rightController.setX((int) (rightController.getX() + defferentY));
+
         GamePadConfig gamePadConfig = new GamePadConfig();
         setJoystickView(joyStickView, gamePadConfig, true);
+        lastY = fusedOrientation[2] * 1000;
+
         tvZAxis.setText(String.format(Locale.getDefault(), "%.1f", z));
         tvXAxis.setText(String.format(Locale.getDefault(), "%.1f", x));
         tvYAxis.setText(String.format(Locale.getDefault(), "%.1f", y));
@@ -365,8 +373,8 @@ public class GyroscopeActivity extends AppCompatActivity implements Cotrollerlis
         controllerXText.post(new Runnable() {
             @Override
             public void run() {
-                controllerXText.setText("x: "+ x);
-                controllerYText.setText("y: "+ y);
+                controllerXText.setText("x: " + x);
+                controllerYText.setText("y: " + y);
             }
         });
 
@@ -379,25 +387,22 @@ public class GyroscopeActivity extends AppCompatActivity implements Cotrollerlis
     }
 
     private void setJoystickView(JoyStickView view, GamePadConfig pState, boolean isRightController) {
-//        view.muckTouch(mockOnTouchJoysticks(view, pState, isRightController));
+        view.muckTouch(mockOnTouchJoysticks(view, pState, isRightController));
     }
 
-    private MotionEvent mockOnTouchJoysticks(JoyStickView view, GamePadConfig pState, boolean isRightController) {
+    private MotionEvent mockOnTouch(JoyStickView view, GamePadConfig pState, boolean isRightController) {
         Controller controller;
         if (isRightController) {
             controller = rightController;
         } else {
             controller = leftController;
         }
-        Log.i("miladTest", "mockOnTouchJoysticks: controller.getX()" + controller.getX());
-        Log.i("miladTest", "mockOnTouchJoysticks: controller.getY()" + controller.getY());
         long downTime = SystemClock.uptimeMillis();
         long eventTime = SystemClock.uptimeMillis() + 50;
         int metaState = 0;
+
         int x = convertRange(0, 360, (int) view.startRange, (int) view.endRange, controller.getX());
         int y = convertRange(0, 360, (int) view.startRange, (int) view.endRange, controller.getY());
-        Log.i("miladTest", "mockOnTouchJoysticks: x" + x);
-        Log.i("miladTest", "mockOnTouchJoysticks: y" + y);
         int motionEvent;
         if (x == 0) {
             view.justShowTouch = false;
@@ -412,6 +417,37 @@ public class GyroscopeActivity extends AppCompatActivity implements Cotrollerlis
                 motionEvent,
                 x,
                 y,
+                metaState
+        );
+    }
+
+
+    private MotionEvent mockOnTouchJoysticks(JoyStickView view, GamePadConfig pState, boolean isRightController) {
+        Controller controller;
+        if (isRightController) {
+            controller = rightController;
+        } else {
+            controller = leftController;
+        }
+        long downTime = SystemClock.uptimeMillis();
+        long eventTime = SystemClock.uptimeMillis() + 50;
+        int metaState = 0;
+//        int x = convertRange(0, 360, (int) view.startRange, (int) view.endRange, controller.getX());
+//        int y = convertRange(0, 360, (int) view.startRange, (int) view.endRange, controller.getY());
+        int motionEvent;
+        if (controller.getX() == 0) {
+            view.justShowTouch = false;
+            motionEvent = MotionEvent.ACTION_UP;
+        } else {
+            view.justShowTouch = true;
+            motionEvent = MotionEvent.ACTION_DOWN;
+        }
+        return MotionEvent.obtain(
+                downTime,
+                eventTime,
+                motionEvent,
+                controller.getX(),
+                controller.getY(),
                 metaState
         );
     }
