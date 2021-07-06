@@ -330,13 +330,18 @@ public class GyroscopeActivity extends AppCompatActivity implements Cotrollerlis
         double x = (Math.toDegrees(fusedOrientation[1]) + 360) % 360;
         double y = (Math.toDegrees(fusedOrientation[2]) + 360) % 360;
 
-        double defferentY = lastY - (fusedOrientation[2] * 1000);
+        double defferentY = lastY - (fusedOrientation[2] * 300);
+        double defferentx = lastX - (fusedOrientation[1] * 300);
         if (defferentY >= 1 || defferentY <= -1)
             rightController.setX((int) (rightController.getX() + defferentY));
+        if (defferentx >= 1 || defferentx <= -1)
+            rightController.setY((int) (rightController.getY() + defferentx));
+
 
         GamePadConfig gamePadConfig = new GamePadConfig();
         setJoystickView(joyStickView, gamePadConfig, true);
-        lastY = fusedOrientation[2] * 1000;
+        lastY = fusedOrientation[2] * 300;
+        lastX = fusedOrientation[1] * 300;
 
         tvZAxis.setText(String.format(Locale.getDefault(), "%.1f", z));
         tvXAxis.setText(String.format(Locale.getDefault(), "%.1f", x));
